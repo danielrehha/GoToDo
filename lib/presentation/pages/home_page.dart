@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:gotodo/core/utils/format_date.dart';
 import 'package:gotodo/data/models/todo_item_model.dart';
 import 'package:gotodo/development_cache.dart';
 import 'package:gotodo/presentation/theme/custom_theme.dart';
+import 'package:gotodo/presentation/widgets/todo_item_widget.dart';
+import 'package:intl/intl.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key key}) : super(key: key);
@@ -14,27 +17,25 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   TextEditingController _addTodoItemController;
-  AnimationController _animationController;
+  ScrollController _scrollController = ScrollController();
 
   List<TodoItemModel> todoItems;
 
   bool isLoading = true;
   bool isAdding = false;
 
+  DateTime _newItemSelectedDate;
+
   @override
   void initState() {
     super.initState();
     _addTodoItemController = TextEditingController();
-    _animationController = AnimationController(
-      duration: Duration(milliseconds: 200),
-      vsync: this,
-    );
     loadTodoItems();
   }
 
   void loadTodoItems() async {
     todoItems = await DevelopmentCache.todoItems();
-    await Future.delayed(Duration(seconds: 2));
+    await Future.delayed(Duration(milliseconds: 500));
     setState(() {
       print('Loaded: ${todoItems[0].title}');
       isLoading = false;
@@ -76,6 +77,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       : Align(
                           alignment: Alignment.topCenter,
                           child: SingleChildScrollView(
+                            controller: _scrollController,
                             physics: BouncingScrollPhysics(),
                             child: Padding(
                               padding: CustomTheme.bezelPaddingAll,
@@ -131,52 +133,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       scrollDirection: Axis.vertical,
       itemCount: todoItems.length,
       itemBuilder: (BuildContext ctxt, int index) {
-        return todoWidget(todoItems[index]);
+        return TodoItemWidget(todoItem: todoItems[index]);
       },
-    );
-  }
-
-  Widget todoWidget(TodoItemModel todoItem) {
-    FormatDate formatDate = FormatDate(todoItem.due);
-    return Padding(
-      padding: CustomTheme.todoItemSpacing,
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(width: 0.5, color: CustomTheme.divider_color),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                todoItem.title,
-                style: CustomTheme.h2,
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              Row(
-                children: [
-                  Icon(
-                    Icons.calendar_today,
-                    color: CustomTheme.accent_body_main,
-                    size: 16,
-                  ),
-                  SizedBox(
-                    width: 8,
-                  ),
-                  Text(
-                    formatDate.date,
-                    style: CustomTheme.bodyTextAccent,
-                  )
-                ],
-              )
-            ],
-          ),
-        ),
-      ),
     );
   }
 
@@ -189,6 +147,34 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               hintText: 'e.g. Learn Portuguese every 2 days #Learning',
               border: InputBorder.none),
           style: CustomTheme.bodyText,
+        ),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 16, top: 6),
+          child: InkWell(
+            child: Row(
+              children: [
+                Icon(
+                  Icons.calendar_today,
+                ),
+                Text(FormatDate.date1(
+                  date: _newItemSelectedDate ?? DateTime.now(),
+                ))
+              ],
+            ),
+            onTap: () {
+              DatePicker.showDatePicker(
+                context,
+                minTime: DateTime.now(),
+                currentTime: _newItemSelectedDate ?? DateTime.now(),
+                locale: LocaleType.en,
+                onConfirm: (DateTime value) {
+                  setState(() {
+                    _newItemSelectedDate = value;
+                  });
+                },
+              );
+            },
+          ),
         ),
         Row(
           children: [
@@ -265,5 +251,15 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     setState(() {
       todoItems.add(todoItem);
     });
+    scrollToBottom();
+  }
+
+  void scrollToBottom() {
+    var scrollPosition = _scrollController.position;
+    _scrollController.animateTo(
+      scrollPosition.maxScrollExtent,
+      duration: Duration(milliseconds: 100),
+      curve: Curves.ease,
+    );
   }
 }

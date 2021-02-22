@@ -6,10 +6,12 @@ import 'package:meta/meta.dart';
 // ignore: must_be_immutable
 class TodoItemModel extends TodoItem {
   TodoItemModel({
+    @required int id,
+    @required String userId,
     @required String title,
     @required DateTime due,
     @required bool done,
-  }) : super(title: title, due: due, done: done);
+  }) : super(id: id, userId: userId, title: title, due: due, done: done);
 
   TodoItemModel.fromJson({@required Map<String, dynamic> json}) {
     this.title = json['title'];
