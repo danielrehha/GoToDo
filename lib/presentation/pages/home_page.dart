@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:gotodo/core/utils/format_date.dart';
 import 'package:gotodo/data/models/todo_item_model.dart';
 import 'package:gotodo/development_cache.dart';
+import 'package:gotodo/domain/entities/todo_item.dart';
+import 'package:gotodo/presentation/bloc/bloc/todo_bloc.dart';
 import 'package:gotodo/presentation/theme/custom_theme.dart';
 import 'package:gotodo/presentation/widgets/todo_item_widget.dart';
 import 'package:intl/intl.dart';
@@ -19,8 +22,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   TextEditingController _addTodoItemController;
   ScrollController _scrollController = ScrollController();
 
-  List<TodoItemModel> todoItems;
-
   bool isLoading = true;
   bool isAdding = false;
 
@@ -30,17 +31,17 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _addTodoItemController = TextEditingController();
-    loadTodoItems();
+    //loadTodoItems();
   }
 
-  void loadTodoItems() async {
+/*   void loadTodoItems() async {
     todoItems = await DevelopmentCache.todoItems();
     await Future.delayed(Duration(milliseconds: 500));
     setState(() {
       print('Loaded: ${todoItems[0].title}');
       isLoading = false;
     });
-  }
+  } */
 
   @override
   Widget build(BuildContext context) {
@@ -66,30 +67,53 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               ),
             ),
             Expanded(
-              child: AnimatedSwitcher(
-                  duration: Duration(milliseconds: 300),
-                  child: isLoading
-                      ? SpinKitCircle(
-                          key: UniqueKey(),
-                          color: CustomTheme.accent_body_main,
-                          size: 32,
-                        )
-                      : Align(
-                          alignment: Alignment.topCenter,
-                          child: SingleChildScrollView(
-                            controller: _scrollController,
-                            physics: BouncingScrollPhysics(),
-                            child: Padding(
-                              padding: CustomTheme.bezelPaddingAll,
-                              child: MediaQuery.removePadding(
-                                context: context,
-                                removeTop: true,
-                                removeBottom: true,
-                                child: buildItemsList(),
-                              ),
-                            ),
+              child: BlocBuilder<TodoBloc, TodoState>(
+                builder: (context, state) {
+                  if (state is TodoInitial) {
+                    BlocProvider.of<TodoBloc>(context)
+                        .add(FetchTodoItems(userId: 'id'));
+                  }
+
+                  if (state is TodoLoading) {
+                    return SpinKitCircle(
+                      key: UniqueKey(),
+                      color: CustomTheme.accent_body_main,
+                      size: 32,
+                    );
+                  }
+
+                  if (state is TodoLoaded) {
+                    return Align(
+                      alignment: Alignment.topCenter,
+                      child: SingleChildScrollView(
+                        controller: _scrollController,
+                        physics: BouncingScrollPhysics(),
+                        child: Padding(
+                          padding: CustomTheme.bezelPaddingAll,
+                          child: MediaQuery.removePadding(
+                            context: context,
+                            removeTop: true,
+                            removeBottom: true,
+                            child: buildItemsList(state.todoItems),
                           ),
-                        )),
+                        ),
+                      ),
+                    );
+                  }
+
+                  if (state is TodoError) {
+                    return Center(
+                      child: Text('Error loading To Do feed :/'),
+                    );
+                  }
+
+                  return SpinKitCircle(
+                    key: UniqueKey(),
+                    color: CustomTheme.accent_body_main,
+                    size: 32,
+                  );
+                },
+              ),
             ),
             Container(
                 decoration: BoxDecoration(boxShadow: [
@@ -126,7 +150,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
-  Widget buildItemsList() {
+  Widget buildItemsList(List<TodoItem> todoItems) {
     return ListView.builder(
       physics: NeverScrollableScrollPhysics(),
       shrinkWrap: true,
@@ -193,7 +217,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   ),
                 ),
                 onTap: () {
-                  addNewTodoItem(_addTodoItemController.text, DateTime.now());
+                  addNewTodoItem(
+                      _addTodoItemController.text, _newItemSelectedDate);
                   isAdding = false;
                   _addTodoItemController.text = '';
                 }),
@@ -247,10 +272,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   void addNewTodoItem(String title, DateTime due) {
-    TodoItemModel todoItem = TodoItemModel(title: title, due: due, done: false);
-    setState(() {
+    TodoItemModel todoItem = TodoItemModel(
+      id: 0,
+      userId: 'id',
+      title: title,
+      due: due,
+      done: false,
+    );
+/*     setState(() {
       todoItems.add(todoItem);
-    });
+    }); */
     scrollToBottom();
   }
 

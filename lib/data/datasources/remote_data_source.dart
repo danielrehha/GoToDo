@@ -10,21 +10,33 @@ import 'package:http/http.dart' as http;
 abstract class IRemoteDataSource {
   Future<List<TodoItemModel>> getAllTodoItems(String userId);
   Future<TodoItemModel> createTodoItem(String userId, TodoItemModel todoItem);
+  Future<TodoItemModel> deleteTodoItem(int id);
 }
 
 class ApiService implements IRemoteDataSource {
-  String baseUrl = 'https://localhost:5002/';
+  String baseUrl = 'https://localhost:5001/';
 
   @override
-  Future<TodoItemModel> createTodoItem(String userId, TodoItemModel todoItem) async {
-    //await http
+  Future<TodoItemModel> createTodoItem(
+      String userId, TodoItemModel todoItem) async {
+    TodoItemModel newTodoItem;
+    final jsonPostBody = jsonEncode(todoItem.toMap());
+    final result = await http.post(baseUrl + 'todo/$userId/create',
+        body: jsonPostBody, headers: {'Content-Type': 'application/json'});
+    if (result.statusCode == 200) {
+      final jsonBody = jsonDecode(result.body);
+      newTodoItem = TodoItemModel.fromJson(json: jsonBody);
+      return newTodoItem;
+    } else {
+      throw new ServerException();
+    }
   }
 
   @override
   Future<List<TodoItemModel>> getAllTodoItems(String userId) async {
     List<TodoItemModel> todoList;
-    final result = await http
-        .get(baseUrl + userId, headers: {'Content-Type': 'application/json'});
+    final result = await http.get(baseUrl + 'todo/$userId/all',
+        headers: {'Content-Type': 'application/json'});
     if (result.statusCode == 200) {
       final jsonBody = jsonDecode(result.body);
       todoList = (jsonBody as List)
@@ -34,5 +46,11 @@ class ApiService implements IRemoteDataSource {
     } else {
       throw new ServerException();
     }
+  }
+
+  @override
+  Future<TodoItemModel> deleteTodoItem(int id) {
+    // TODO: implement deleteTodoItem
+    throw UnimplementedError();
   }
 }
