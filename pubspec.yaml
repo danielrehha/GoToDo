@@ -29,12 +29,14 @@ dependencies:
   data_connection_checker: ^0.3.4
   equatable: ^1.2.6
   flutter_bloc: ^6.1.2
+  flutter_datetime_picker: ^1.5.0
   flutter_spinkit: ^4.1.2+1
   http: ^0.12.2
-  meta: ^1.2.4
-  shared_preferences: ^0.5.12+4
   intl: ^0.16.1
-  flutter_datetime_picker: ^1.5.0
+  meta: ^1.2.4
+  page_transition: ^1.1.7+6
+  shared_preferences: ^0.5.12+4
+  flutter_icons: ^1.1.0
 
 dev_dependencies:
   flutter_test:
@@ -50,7 +52,12 @@ flutter:
   uses-material-design: true
   # To add assets to your application, add an assets section, like this:
   assets:
-     - assets/todos.json
+    - todos.json
+    - logo.png
+    - bg_ambient_1.jpeg
+    - jordan.png
+    - todo_mockup.png
+
   #   - images/a_dot_ham.jpeg
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
@@ -61,10 +68,37 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
+  fonts:
+    - family: Proxima
+      fonts:
+        - asset: ./assets/fonts/PNThin.otf
+          weight: 300
+        - asset: ./assets/fonts/PNRegular.otf
+          weight: 400
+        - asset: ./assets/fonts/PNMedium.otf
+          weight: 500
+        - asset: ./assets/fonts/PNSBold.otf
+          weight: 600
+        - asset: ./assets/fonts/PNBold.otf
+          weight: 700
+        - asset: ./assets/fonts/PNEBold.otf
+          weight: 800
+        - asset: ./assets/fonts/PNBlack.otf
+          weight: 900
+    - family: Halifax
+      fonts:
+        - asset: ./assets/fonts/HFELight.ttf
+          weight: 200
+        - asset: ./assets/fonts/HFLight.ttf
+          weight: 300
+        - asset: ./assets/fonts/HFRegular.ttf
+          weight: 400
+        - asset: ./assets/fonts/HFMedium.ttf
+          weight: 500
+        - asset: ./assets/fonts/HFBold.ttf
+          weight: 600
+        - asset: ./assets/fonts/HFBlack.ttf
+          weight: 700
   #       - asset: fonts/Schyler-Italic.ttf
   #         style: italic
   #   - family: Trajan Pro

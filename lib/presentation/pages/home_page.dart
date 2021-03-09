@@ -22,7 +22,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   TextEditingController _addTodoItemController;
   ScrollController _scrollController = ScrollController();
 
-  bool isLoading = true;
   bool isAdding = false;
 
   DateTime _newItemSelectedDate;
@@ -103,7 +102,20 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
                   if (state is TodoError) {
                     return Center(
-                      child: Text('Error loading To Do feed :/'),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.error_outline,
+                            color: CustomTheme.accent_body_main,
+                            size: 36,
+                          ),
+                          SizedBox(
+                            height: 8,
+                          ),
+                          Text('Uh oh, something went wrong!'),
+                        ],
+                      ),
                     );
                   }
 
@@ -279,9 +291,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       due: due,
       done: false,
     );
-/*     setState(() {
-      todoItems.add(todoItem);
-    }); */
+    setState(() {
+      isAdding = !isAdding;
+    });
     scrollToBottom();
   }
 

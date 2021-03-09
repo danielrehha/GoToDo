@@ -19,12 +19,12 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
   ) async* {
     if (event is FetchTodoItems) {
       yield TodoLoading();
-      var result = await repository.getAllTodoItems(event.userId);
+/*       var result = await repository.getAllTodoItems(event.userId);
       if (result.isRight()) {
         yield TodoLoaded(todoItems: result.getOrElse(() => null));
       } else {
         yield TodoError();
-      }
+      } */
     }
   }
 }
