@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:gotodo/presentation/theme/custom_theme.dart';
-import 'package:gotodo/presentation_v1.1/theme/custom_theme_v1.1.dart';
-import 'package:gotodo/presentation_v1.1/widgets/widget_button.dart';
+import 'package:gotodo/presentation/theme/custom_theme_v1.1.dart';
+import 'package:gotodo/presentation/widgets/widget_button.dart';
 
-class SignupPage extends StatelessWidget {
-  const SignupPage({Key key}) : super(key: key);
+class LoginPage extends StatelessWidget {
+  const LoginPage({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +14,7 @@ class SignupPage extends StatelessWidget {
         ),
         child: SafeArea(
           child: Padding(
-            padding: CustomTheme.bezelPaddingAll,
+            padding: AppTheme.bezelPaddingAll,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -32,7 +31,7 @@ class SignupPage extends StatelessWidget {
                       },
                     ),
                     Text(
-                      'Registration',
+                      'Login',
                       style: AppTheme.textStyle_h3_black,
                     ),
                     Icon(
@@ -59,36 +58,6 @@ class SignupPage extends StatelessWidget {
                               border: InputBorder.none,
                               hintText: 'Email address',
                             ),
-                            style: AppTheme.textStyle_body_black,
-                          ),
-                        ),
-                        Icon(
-                          Icons.check,
-                          size: 18,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  height: 12,
-                ),
-                Container(
-                  decoration: BoxDecoration(
-                      color: Color.fromRGBO(0, 0, 0, 0.07),
-                      borderRadius: AppTheme.borderRadius),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            autofocus: true,
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              hintText: 'Confirm email address',
-                            ),
-                            style: AppTheme.textStyle_body_black,
                           ),
                         ),
                         Icon(
@@ -117,7 +86,6 @@ class SignupPage extends StatelessWidget {
                               border: InputBorder.none,
                               hintText: 'Password',
                             ),
-                            style: AppTheme.textStyle_body_black,
                           ),
                         ),
                         Icon(
@@ -134,12 +102,12 @@ class SignupPage extends StatelessWidget {
                 Container(
                   width: 120,
                   child: MainButton(
-                    color: AppTheme.color_accent_5,
+                    color: AppTheme.color_accent_1,
                     label: 'Continue',
-                    labelStyle: AppTheme.textStyle_h3_black,
+                    labelStyle: AppTheme.textStyle_h3_white,
                     function: () {
-                      Navigator.of(context)
-                          .pushReplacementNamed('/auth/signup/details');
+                      Navigator.of(context).pushNamedAndRemoveUntil(
+                          '/', (Route<dynamic> route) => false);
                     },
                   ),
                 ),

@@ -37,6 +37,8 @@ dependencies:
   page_transition: ^1.1.7+6
   shared_preferences: ^0.5.12+4
   flutter_icons: ^1.1.0
+  flutter_calendar_carousel: ^1.5.3
+  table_calendar: ^2.3.3
 
 dev_dependencies:
   flutter_test:

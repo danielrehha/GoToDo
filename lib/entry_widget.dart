@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gotodo/domain/repositories/todo_item_repository.dart';
-import 'package:gotodo/presentation/bloc/bloc/todo_bloc.dart';
-import 'package:gotodo/presentation_v1.1/pages/auth/page_login.dart';
-import 'package:gotodo/presentation_v1.1/pages/auth/page_signup.dart';
-import 'package:gotodo/presentation_v1.1/pages/auth/page_signup_details.dart';
+import 'package:gotodo/presentation/bloc/bloc_todo_list/todo_bloc.dart';
+import 'package:gotodo/presentation/pages/auth/page_login.dart';
+import 'package:gotodo/presentation/pages/auth/page_signup.dart';
+import 'package:gotodo/presentation/pages/auth/page_signup_details.dart';
+import 'package:gotodo/presentation/pages/home/page_home_revision.dart';
 
-import 'presentation_v1.1/pages/home/page_home.dart';
-import 'presentation_v1.1/pages/auth/page_auth.dart';
+import 'presentation/pages/home/page_home.dart';
+import 'presentation/pages/auth/page_auth.dart';
 
 class EntryWidget extends StatelessWidget {
   final ITodoItemRepository todoItemRepository;
@@ -22,7 +23,7 @@ class EntryWidget extends StatelessWidget {
         theme: ThemeData(
           fontFamily: 'Halifax',
         ),
-        initialRoute: '/',
+        initialRoute: '/home_revision',
         routes: {
           '/': (context) => HomePage(),
           '/auth': (context) => AuthPage(),
@@ -30,6 +31,7 @@ class EntryWidget extends StatelessWidget {
           '/auth/signup': (context) => SignupPage(),
           '/auth/signup/details': (context) => SignupDetails(),
           '/home': (context) => HomePage(),
+          '/home_revision': (context) => HomePageRevision()
         },
         debugShowCheckedModeBanner: false,
       ),

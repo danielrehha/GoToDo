@@ -5,9 +5,10 @@ import 'package:flutter_icons/flutter_icons.dart';
 import 'package:gotodo/data/models/todo_item_model.dart';
 import 'package:gotodo/domain/entities/todo_item.dart';
 import 'package:gotodo/fixtures/fixture.dart';
-import 'package:gotodo/presentation_v1.1/pages/home/page_add_task.dart';
-import 'package:gotodo/presentation_v1.1/theme/custom_theme_v1.1.dart';
-import 'package:gotodo/presentation_v1.1/widgets/widget_task.dart';
+import 'package:gotodo/presentation/pages/home/page_add_task.dart';
+import 'package:gotodo/presentation/pages/home/page_profile.dart';
+import 'package:gotodo/presentation/theme/custom_theme_v1.1.dart';
+import 'package:gotodo/presentation/widgets/widget_task.dart';
 import 'package:page_transition/page_transition.dart';
 
 class HomePage extends StatefulWidget {
@@ -85,9 +86,20 @@ class _HomePageState extends State<HomePage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Icon(
-                          Feather.menu,
-                          size: AppTheme.iconSize,
+                        InkWell(
+                          child: Icon(
+                            Feather.menu,
+                            size: AppTheme.iconSize,
+                          ),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              PageTransition(
+                                type: PageTransitionType.bottomToTop,
+                                child: ProfilePage(),
+                              ),
+                            );
+                          },
                         ),
                         InkWell(
                           child: Icon(

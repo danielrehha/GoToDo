@@ -85,6 +85,13 @@ class AppTheme {
     letterSpacing: _letterSpacing,
   );
 
+  static const TextStyle textStyle_body_small_red = TextStyle(
+    fontSize: 16,
+    color: Colors.red,
+    fontWeight: FontWeight.w400,
+    letterSpacing: _letterSpacing,
+  );
+
   //Color switches
   static const Color color_accent_1 = Color.fromRGBO(3, 37, 76, 1);
 

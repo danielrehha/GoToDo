@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:gotodo/presentation/theme/custom_theme.dart';
-import 'package:gotodo/presentation_v1.1/theme/custom_theme_v1.1.dart';
-import 'package:gotodo/presentation_v1.1/widgets/widget_button.dart';
+import 'package:gotodo/presentation/theme/custom_theme_v1.1.dart';
+import 'package:gotodo/presentation/widgets/widget_button.dart';
 
 class SignupDetails extends StatefulWidget {
   SignupDetails({Key key}) : super(key: key);
@@ -22,7 +21,7 @@ class _SignupDetailsState extends State<SignupDetails> {
         ),
         child: SafeArea(
           child: Padding(
-            padding: CustomTheme.bezelPaddingAll,
+            padding: AppTheme.bezelPaddingAll,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,

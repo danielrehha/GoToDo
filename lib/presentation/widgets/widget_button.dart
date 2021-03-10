@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gotodo/presentation_v1.1/theme/custom_theme_v1.1.dart';
+import 'package:gotodo/presentation/theme/custom_theme_v1.1.dart';
 
 class MainButton extends StatelessWidget {
   final Color color;

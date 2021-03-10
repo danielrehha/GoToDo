@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:gotodo/core/utils/translate_date.dart';
+import 'package:gotodo/core/utils/translate_date_color.dart';
 import 'package:gotodo/data/models/todo_item_model.dart';
 import 'package:gotodo/domain/entities/todo_item.dart';
-import 'package:gotodo/presentation_v1.1/theme/custom_theme_v1.1.dart';
+import 'package:gotodo/presentation/theme/custom_theme_v1.1.dart';
 
 typedef TodoCompletedCallback = void Function(TodoItem todoItem);
 
@@ -64,8 +66,9 @@ class _TaskRowWidgetState extends State<TaskRowWidget> {
                         width: 4,
                       ),
                       Text(
-                        'Today',
-                        style: AppTheme.textStyle_body_small,
+                        TranslateDate.call(date: widget.todoItem.due),
+                        style:
+                            TranslateDateColor.call(date: widget.todoItem.due),
                       ),
                     ],
                   ),
