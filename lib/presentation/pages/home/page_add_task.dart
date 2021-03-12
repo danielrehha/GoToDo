@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:gotodo/core/utils/translate_date.dart';
 import 'package:gotodo/data/models/todo_item_model.dart';
 import 'package:gotodo/domain/entities/todo_item.dart';
+import 'package:gotodo/presentation/bloc/bloc_todo_item/todoitem_bloc.dart';
 import 'package:gotodo/presentation/theme/custom_theme_v1.1.dart';
 import 'package:gotodo/presentation/widgets/widget_button.dart';
 import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart';
@@ -64,6 +67,8 @@ class _AddTaskPageState extends State<AddTaskPage>
     });
 
     todoItem = TodoItemModel(
+      id: 0,
+      userId: 'id',
       title: taskTitleController.text,
       due: DateTime.now(),
       done: false,
@@ -92,10 +97,39 @@ class _AddTaskPageState extends State<AddTaskPage>
                     'Create task',
                     style: AppTheme.textStyle_h3_black,
                   ),
-                  Icon(
-                    Icons.cancel,
-                    color: Colors.transparent,
-                    size: AppTheme.iconSize,
+                  BlocBuilder<TodoItemBloc, TodoItemState>(
+                    builder: (context, state) {
+                      if (state is TodoItemCreating) {
+                        return SpinKitCircle(
+                          color: Colors.blue,
+                          size: AppTheme.iconSize,
+                        );
+                      }
+
+                      if (state is TodoItemCreationError) {
+                        return Icon(
+                          Feather.info,
+                          size: AppTheme.iconSize,
+                          color: Colors.red,
+                        );
+                      }
+
+                      if (state is TodoItemCreated) {
+                        widget.addTaskCallback(state.todoItem);
+                        popContextAfterTaskAdded(context);
+                        return Icon(
+                          Feather.check,
+                          size: AppTheme.iconSize,
+                          color: Colors.green,
+                        );
+                      }
+
+                      return Icon(
+                        Icons.cancel,
+                        color: Colors.transparent,
+                        size: AppTheme.iconSize,
+                      );
+                    },
                   ),
                 ],
               ),
@@ -156,9 +190,7 @@ class _AddTaskPageState extends State<AddTaskPage>
               MainButton(
                 color: AppTheme.color_accent_1,
                 function: () {
-                  todoItem.title = taskTitleController.text;
-                  widget.addTaskCallback(todoItem);
-                  Navigator.pop(context);
+                  submitTodoItemToBloc(context, todoItem: todoItem);
                 },
                 label: 'Add task',
                 labelStyle: AppTheme.textStyle_h3_white,
@@ -168,6 +200,19 @@ class _AddTaskPageState extends State<AddTaskPage>
         ),
       ),
     );
+  }
+
+  void popContextAfterTaskAdded(BuildContext context) async {
+    await Future.delayed(Duration(milliseconds: 300));
+    BlocProvider.of<TodoItemBloc>(context).add(ResetAddTaskPageState());
+    Navigator.pop(context);
+  }
+
+  void submitTodoItemToBloc(BuildContext context,
+      {@required TodoItem todoItem}) {
+    todoItem.title = taskTitleController.text;
+    BlocProvider.of<TodoItemBloc>(context)
+        .add(CreateTodoItemEvent(todoItem: todoItem));
   }
 
   Widget datePicker() {

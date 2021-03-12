@@ -1,7 +1,7 @@
 import 'package:gotodo/domain/entities/user.dart';
 import 'package:meta/meta.dart';
 
-class UserModel extends User {
+class UserModel extends UserEntity {
   UserModel({@required String userId, @required String username})
       : super(userId: userId, username: username);
 

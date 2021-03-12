@@ -9,11 +9,13 @@ class CreateTodoItem implements UseCase {
   final ITodoItemRepository todoItemRepository;
 
   CreateTodoItem(this.todoItemRepository);
+
   @override
   Future<Either<Failure, TodoItemModel>> call({
     @required String userId,
     @required TodoItemModel todoItem,
   }) async {
-    return await todoItemRepository.createTodoItem(userId, todoItem);
+    return await todoItemRepository.createTodoItem(
+        userId: userId, todoItem: todoItem);
   }
 }

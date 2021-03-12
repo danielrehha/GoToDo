@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:gotodo/core/utils/translate_date.dart';
 import 'package:gotodo/core/utils/translate_date_color.dart';
 import 'package:gotodo/data/models/todo_item_model.dart';
 import 'package:gotodo/domain/entities/todo_item.dart';
+import 'package:gotodo/presentation/bloc/bloc_todo_item/todoitem_bloc.dart';
 import 'package:gotodo/presentation/theme/custom_theme_v1.1.dart';
 
-typedef TodoCompletedCallback = void Function(TodoItem todoItem);
+typedef TodoCompletedCallback = Future<void> Function(
+    TodoItem todoItem, bool success);
 
 class TaskRowWidget extends StatefulWidget {
   final TodoCompletedCallback onTodoCompleted;
@@ -24,6 +28,14 @@ class TaskRowWidget extends StatefulWidget {
 }
 
 class _TaskRowWidgetState extends State<TaskRowWidget> {
+  bool successCompletingItem = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -38,7 +50,36 @@ class _TaskRowWidgetState extends State<TaskRowWidget> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              customCheckBox(),
+              BlocBuilder<TodoItemBloc, TodoItemState>(
+                builder: (context, state) {
+                  if (state is TodoItemCompleting &&
+                      state.todoItem.id == widget.todoItem.id) {
+                    return SpinKitCircle(
+                      color: Colors.white,
+                      size: AppTheme.iconSize,
+                    );
+                  }
+
+                  if (state is TodoItemCompletionError &&
+                      state.todoItem.id == widget.todoItem.id) {
+                    return Icon(
+                      Feather.info,
+                      size: AppTheme.iconSize,
+                      color: Colors.red,
+                    );
+                  }
+
+                  if (state is TodoItemCompleted &&
+                      state.todoItem.id == widget.todoItem.id) {
+                    widget.todoItem = state.todoItem;
+                    successCompletingItem = true;
+                    widget.onTodoCompleted(
+                        widget.todoItem, successCompletingItem);
+                  }
+
+                  return customCheckBox(context);
+                },
+              ),
               SizedBox(
                 width: 10,
               ),
@@ -81,7 +122,7 @@ class _TaskRowWidgetState extends State<TaskRowWidget> {
     );
   }
 
-  Widget customCheckBox() {
+  Widget customCheckBox(BuildContext context) {
     const double _size = 25.0;
     const double _borderRadius = 32.0;
     const Color _checkColor = Colors.grey;
@@ -127,10 +168,11 @@ class _TaskRowWidgetState extends State<TaskRowWidget> {
         ),
       ),
       onTap: () {
-        setState(() {
-          widget.onTodoCompleted(widget.todoItem);
-          widget.todoItem.done = !widget.todoItem.done;
-        });
+        TodoItemModel todoItemModel = widget.todoItem;
+        //todoItemModel.id = 100;
+        BlocProvider.of<TodoItemBloc>(context).add(
+          CompleteTodoItemEvent(todoItem: todoItemModel),
+        );
       },
     );
   }

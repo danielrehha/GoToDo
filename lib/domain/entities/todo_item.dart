@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
@@ -12,10 +10,10 @@ class TodoItem extends Equatable {
 
   TodoItem({
     @required this.id,
-    @required this.userId,
     @required this.title,
     @required this.due,
     @required this.done,
+    @required this.userId,
   });
 
   @override
@@ -23,11 +21,11 @@ class TodoItem extends Equatable {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
-      'userId': userId,
-      'title': title,
-      'due': due?.millisecondsSinceEpoch,
-      'done': done,
+      'Id': id,
+      'Title': title,
+      'Due': due?.millisecondsSinceEpoch,
+      'Done': done,
+      'UserId': userId,
     };
   }
 }

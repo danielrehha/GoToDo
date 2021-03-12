@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:gotodo/domain/entities/todo_item.dart';
 import 'package:meta/meta.dart';
 
@@ -25,9 +23,9 @@ class TodoItemModel extends TodoItem {
     return {
       'id': this.id,
       'title': this.title,
-      'due': this.due.toString(),
+      'due': this.due.toIso8601String(),
       'done': this.done,
-      'userId': this.userId,
+      'userid': this.userId,
     };
   }
 }

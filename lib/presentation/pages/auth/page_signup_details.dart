@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:gotodo/presentation/theme/custom_theme_v1.1.dart';
-import 'package:gotodo/presentation/widgets/widget_button.dart';
 
 class SignupDetails extends StatefulWidget {
   SignupDetails({Key key}) : super(key: key);

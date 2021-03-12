@@ -1,14 +1,10 @@
-import 'dart:convert';
-
-import 'package:dartz/dartz_unsafe.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:gotodo/data/models/todo_item_model.dart';
 import 'package:gotodo/domain/entities/todo_item.dart';
-import 'package:gotodo/fixtures/fixture.dart';
-import 'package:gotodo/presentation/bloc/bloc_todo_list/todo_bloc.dart';
+import 'package:gotodo/presentation/bloc/bloc_todo_list/todolist_bloc.dart';
 import 'package:gotodo/presentation/pages/home/page_add_task.dart';
 import 'package:gotodo/presentation/pages/home/page_profile.dart';
 import 'package:gotodo/presentation/theme/custom_theme_v1.1.dart';
@@ -22,7 +18,8 @@ class HomePageRevision extends StatefulWidget {
   _HomePageRevisionState createState() => _HomePageRevisionState();
 }
 
-class _HomePageRevisionState extends State<HomePageRevision> {
+class _HomePageRevisionState extends State<HomePageRevision>
+    with SingleTickerProviderStateMixin {
   List<TodoItemModel> todoItems = List<TodoItemModel>();
   final GlobalKey<AnimatedListState> _todoListKey =
       GlobalKey<AnimatedListState>();
@@ -30,9 +27,27 @@ class _HomePageRevisionState extends State<HomePageRevision> {
   Duration _itemInsertDuration = Duration(milliseconds: 100);
   final ScrollController _scrollController = ScrollController();
 
+  Tween<Offset> _offset = Tween(begin: Offset(1, 0), end: Offset(0, 0));
+  AnimationController _animationController;
+  TweenSequence<Offset> _slideOutAnimation;
+
   @override
   void initState() {
     super.initState();
+    _animationController = AnimationController(
+      duration: Duration(milliseconds: 1000),
+      vsync: this,
+    );
+
+    _slideOutAnimation = TweenSequence([
+      TweenSequenceItem<Offset>(
+        tween: Tween<Offset>(
+          begin: Offset(0, 0),
+          end: Offset(0, 0),
+        ),
+        weight: 50,
+      ),
+    ]);
   }
 
   void insertItemsInState({@required List<TodoItemModel> todoItemsFromState}) {
@@ -43,10 +58,10 @@ class _HomePageRevisionState extends State<HomePageRevision> {
     Future ft = Future(() {});
 
     ft.then((_) {
-      Future.delayed(Duration(milliseconds: 100));
-      todoItemsFromState.forEach((item) {
-        //_todoListKey.currentState.insertItem()
-      });
+      Future.delayed(Duration(milliseconds: 50));
+      for (var item in todoItems) {
+        //_todoListKey.currentState.insertItem(todoItems.indexOf(item));
+      }
     });
   }
 
@@ -128,7 +143,6 @@ class _HomePageRevisionState extends State<HomePageRevision> {
                                 type: PageTransitionType.bottomToTop,
                                 child: AddTaskPage(
                                   addTaskCallback: (TodoItem todoItem) {
-                                    todoItem.id = newItemId();
                                     addSingleItem(todoItem);
                                   },
                                 ),
@@ -158,8 +172,10 @@ class _HomePageRevisionState extends State<HomePageRevision> {
                           }
 
                           if (state is TodoLoaded) {
-                            insertItemsInState(
-                                todoItemsFromState: state.todoItems);
+                            if (todoItems.isEmpty) {
+                              insertItemsInState(
+                                  todoItemsFromState: state.todoItems);
+                            }
                             return Align(
                               alignment: Alignment.topCenter,
                               child: SingleChildScrollView(
@@ -217,7 +233,9 @@ class _HomePageRevisionState extends State<HomePageRevision> {
     );
   }
 
-  Widget buildTodoList({@required List<TodoItemModel> todoItemsFromState}) {
+  Widget buildTodoList({
+    @required List<TodoItemModel> todoItemsFromState,
+  }) {
     return AnimatedList(
       physics: BouncingScrollPhysics(),
       controller: _scrollController,
@@ -226,46 +244,62 @@ class _HomePageRevisionState extends State<HomePageRevision> {
       initialItemCount: todoItems.length,
       itemBuilder: (context, index, animation) {
         return buildItem(
-          todoItem: todoItems[index],
-          index: index,
-          animation: animation,
-        );
+            todoItem: todoItems[index],
+            index: index,
+            animation: animation,
+            context: context,
+            onPressed: () async {
+              await Future.delayed(Duration(milliseconds: 100));
+              completeTask(
+                todoItem: todoItems[index],
+              );
+            });
       },
     );
   }
 
-  Tween<Offset> _offset = Tween(begin: Offset(1, 0), end: Offset(0, 0));
-
-  Widget buildItem(
-      {@required TodoItem todoItem,
-      @required int index,
-      @required Animation<double> animation,
-      Function onPressed}) {
+  Widget buildItem({
+    @required TodoItem todoItem,
+    @required int index,
+    @required Animation<double> animation,
+    Function onPressed,
+    @required BuildContext context,
+  }) {
     return SlideTransition(
-      position: animation.drive(_offset.chain(CurveTween(curve: Curves.ease))),
+      position: animation.drive(_offset.chain(CurveTween(
+        curve: Curves.slowMiddle,
+      ))),
       child: TaskRowWidget(
         todoItem: todoItem,
         animation: animation,
-        onTodoCompleted: (TodoItem todoItem) {
-          completeTask(todoItem: todoItem);
+        onTodoCompleted: (TodoItem todoItem, bool success) async {
+          onPressed();
         },
       ),
     );
   }
 
   void completeTask({@required TodoItem todoItem}) {
-    int index = todoItems.indexOf(todoItem);
+    TodoItem to_be_deleted = todoItem;
+    to_be_deleted.done = false;
+    int index = todoItems.indexOf(to_be_deleted);
+    print(index);
 
-    _todoListKey.currentState.removeItem(
-      index,
-      (BuildContext context, Animation animation) {
-        return buildItem(
+    //For extra safety measure
+    if (index >= 0) {
+      _todoListKey.currentState.removeItem(
+        index,
+        (BuildContext context, Animation animation) {
+          return buildItem(
             todoItem: todoItem,
             animation: animation,
             index: index,
-            onPressed: () {});
-      },
-    );
+            onPressed: () {},
+            context: context,
+          );
+        },
+      );
+    }
 
     todoItems.removeWhere((item) => item.id == todoItem.id);
     print('removing item at #$index');

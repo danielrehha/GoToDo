@@ -1,4 +1,4 @@
-part of 'todo_bloc.dart';
+part of 'todolist_bloc.dart';
 
 abstract class TodoState extends Equatable {
   const TodoState();

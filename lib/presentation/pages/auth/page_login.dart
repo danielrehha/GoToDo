@@ -107,7 +107,7 @@ class LoginPage extends StatelessWidget {
                     labelStyle: AppTheme.textStyle_h3_white,
                     function: () {
                       Navigator.of(context).pushNamedAndRemoveUntil(
-                          '/', (Route<dynamic> route) => false);
+                          '/home', (Route<dynamic> route) => false);
                     },
                   ),
                 ),

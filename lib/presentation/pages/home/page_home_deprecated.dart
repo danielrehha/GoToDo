@@ -190,8 +190,10 @@ class _HomePageState extends State<HomePage> {
       child: TaskRowWidget(
         todoItem: todoItem,
         animation: animation,
-        onTodoCompleted: (TodoItem todoItem) {
-          toggleItem(todoItem: todoItem);
+        onTodoCompleted: (TodoItem todoItem, bool success) {
+          if (success) {
+            toggleItem(todoItem: todoItem);
+          }
         },
       ),
     );

@@ -5,8 +5,8 @@ import 'package:gotodo/data/models/todo_item_model.dart';
 import 'package:gotodo/domain/repositories/todo_item_repository.dart';
 import 'package:meta/meta.dart';
 
-part 'todo_event.dart';
-part 'todo_state.dart';
+part 'todolist_event.dart';
+part 'todolist_state.dart';
 
 class TodoBloc extends Bloc<TodoEvent, TodoState> {
   final ITodoItemRepository repository;
