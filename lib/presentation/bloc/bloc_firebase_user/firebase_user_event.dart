@@ -4,17 +4,32 @@ abstract class FirebaseUserEvent extends Equatable {
   const FirebaseUserEvent();
 }
 
-class SignInUserEvent extends FirebaseUserEvent {
+class FirebaseResetErrorStateEvent extends FirebaseUserEvent {
+  @override
+  List<Object> get props => [];
+}
+
+class FirebaseSignInUserEvent extends FirebaseUserEvent {
+  final String email;
+  final String password;
+
+  FirebaseSignInUserEvent({@required this.email, @required this.password});
+
+  @override
+  List<Object> get props => [email, password];
+}
+
+class FirebaseCreateUserEvent extends FirebaseUserEvent {
   final String password;
   final String email;
 
-  SignInUserEvent(this.password, this.email);
+  FirebaseCreateUserEvent(this.password, this.email);
 
   @override
-  List<Object> get props => [password,email];
+  List<Object> get props => [password, email];
 }
 
-class SignOutUserEvent extends FirebaseUserEvent {
+class FirebaseSignOutUserEvent extends FirebaseUserEvent {
   @override
-  List<Object> get props => throw UnimplementedError();
+  List<Object> get props => [];
 }

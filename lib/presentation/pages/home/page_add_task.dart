@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:gotodo/core/providers/user_provider/user_provider.dart';
+import 'package:gotodo/core/utils/empty_field_verification.dart';
 import 'package:gotodo/core/utils/translate_date.dart';
 import 'package:gotodo/data/models/todo_item_model.dart';
 import 'package:gotodo/domain/entities/todo_item.dart';
@@ -9,6 +11,7 @@ import 'package:gotodo/presentation/bloc/bloc_todo_item/todoitem_bloc.dart';
 import 'package:gotodo/presentation/theme/custom_theme_v1.1.dart';
 import 'package:gotodo/presentation/widgets/widget_button.dart';
 import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart';
+import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 typedef AddTaskCallback = void Function(TodoItem todoItem);
@@ -34,6 +37,10 @@ class _AddTaskPageState extends State<AddTaskPage>
   Animation<double> _datePickerAnimation;
 
   bool isDatePickerOpened = false;
+  bool isErrorMessage = false;
+  String errorMessage = 'Task title cannot be empty';
+
+  EmptyFieldVerification fieldVerification = EmptyFieldVerification();
 
   @override
   void initState() {
@@ -77,6 +84,8 @@ class _AddTaskPageState extends State<AddTaskPage>
 
   @override
   Widget build(BuildContext context) {
+    todoItem.userId =
+        Provider.of<UserProvider>(context, listen: false).userModel.userId;
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -134,7 +143,7 @@ class _AddTaskPageState extends State<AddTaskPage>
                 ],
               ),
               SizedBox(
-                height: 8,
+                height: 12,
               ),
               Container(
                 decoration: BoxDecoration(
@@ -149,12 +158,32 @@ class _AddTaskPageState extends State<AddTaskPage>
                         hintText: 'e.g. Buy groceries'),
                     controller: taskTitleController,
                     autofocus: true,
+                    onChanged: (String value) {
+                      hideError();
+                    },
                   ),
                 ),
               ),
               SizedBox(
-                height: 8,
+                height: 12,
               ),
+              isErrorMessage
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          errorMessage,
+                          textAlign: TextAlign.start,
+                          style: TextStyle(
+                            color: Colors.red,
+                          ),
+                        ),
+                        SizedBox(
+                          height: 12,
+                        ),
+                      ],
+                    )
+                  : Container(),
               InkWell(
                 child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -202,17 +231,33 @@ class _AddTaskPageState extends State<AddTaskPage>
     );
   }
 
-  void popContextAfterTaskAdded(BuildContext context) async {
-    await Future.delayed(Duration(milliseconds: 300));
-    BlocProvider.of<TodoItemBloc>(context).add(ResetAddTaskPageState());
-    Navigator.pop(context);
+  void popContextAfterTaskAdded(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      await Future.delayed(Duration(milliseconds: 200));
+      BlocProvider.of<TodoItemBloc>(context).add(ResetAddTaskPageEvent());
+      Navigator.pop(context);
+    });
   }
 
   void submitTodoItemToBloc(BuildContext context,
       {@required TodoItem todoItem}) {
-    todoItem.title = taskTitleController.text;
-    BlocProvider.of<TodoItemBloc>(context)
-        .add(CreateTodoItemEvent(todoItem: todoItem));
+    if (fieldVerification(value: taskTitleController.text)) {
+      todoItem.title = taskTitleController.text;
+      BlocProvider.of<TodoItemBloc>(context)
+          .add(CreateTodoItemEvent(todoItem: todoItem));
+    } else {
+      setState(() {
+        isErrorMessage = true;
+      });
+    }
+  }
+
+  void hideError() {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      setState(() {
+        this.isErrorMessage = false;
+      });
+    });
   }
 
   Widget datePicker() {

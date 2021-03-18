@@ -1,17 +1,13 @@
 import 'dart:io';
-
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:gotodo/data/datasources/remote_data_source.dart';
-import 'package:gotodo/domain/repositories/todo_item_repository.dart';
-import 'package:gotodo/entry_widget.dart';
+import 'entry_widget.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   HttpOverrides.global = new MyHttpOverrides();
-  runApp(EntryWidget(
-    todoItemRepository: TodoItemRepository(
-      remoteDataSource: ApiService(),
-    ),
-  ));
+  Firebase.initializeApp();
+  runApp(EntryWidget());
 }
 
 class MyHttpOverrides extends HttpOverrides {

@@ -11,3 +11,8 @@ class FetchTodoItems extends TodoEvent {
   @override
   List<Object> get props => [userId];
 }
+
+class ClearTodoItemsEvent extends TodoEvent {
+  @override
+  List<Object> get props => [];
+}

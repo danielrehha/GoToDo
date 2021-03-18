@@ -2,14 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:gotodo/core/providers/user_provider/user_provider.dart';
 import 'package:gotodo/data/models/todo_item_model.dart';
 import 'package:gotodo/domain/entities/todo_item.dart';
+import 'package:gotodo/presentation/bloc/bloc_firebase_user/firebase_user_bloc.dart';
 import 'package:gotodo/presentation/bloc/bloc_todo_list/todolist_bloc.dart';
 import 'package:gotodo/presentation/pages/home/page_add_task.dart';
 import 'package:gotodo/presentation/pages/home/page_profile.dart';
 import 'package:gotodo/presentation/theme/custom_theme_v1.1.dart';
 import 'package:gotodo/presentation/widgets/widget_task.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:provider/provider.dart';
 
 class HomePageRevision extends StatefulWidget {
   const HomePageRevision({Key key}) : super(key: key);
@@ -20,7 +23,7 @@ class HomePageRevision extends StatefulWidget {
 
 class _HomePageRevisionState extends State<HomePageRevision>
     with SingleTickerProviderStateMixin {
-  List<TodoItemModel> todoItems = List<TodoItemModel>();
+  List<TodoItemModel> todoItems = <TodoItemModel>[];
   final GlobalKey<AnimatedListState> _todoListKey =
       GlobalKey<AnimatedListState>();
 
@@ -34,6 +37,7 @@ class _HomePageRevisionState extends State<HomePageRevision>
   @override
   void initState() {
     super.initState();
+
     _animationController = AnimationController(
       duration: Duration(milliseconds: 1000),
       vsync: this,
@@ -51,17 +55,14 @@ class _HomePageRevisionState extends State<HomePageRevision>
   }
 
   void insertItemsInState({@required List<TodoItemModel> todoItemsFromState}) {
-    todoItemsFromState.forEach((item) {
-      todoItems.add(item);
-    });
-
-    Future ft = Future(() {});
-
-    ft.then((_) {
-      Future.delayed(Duration(milliseconds: 50));
-      for (var item in todoItems) {
-        //_todoListKey.currentState.insertItem(todoItems.indexOf(item));
-      }
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      int index = 0;
+      todoItemsFromState.forEach((item) {
+        todoItems.add(item);
+        _todoListKey.currentState.insertItem(index);
+        index += 1;
+      });
+      await Future.delayed(Duration(milliseconds: 50));
     });
   }
 
@@ -86,6 +87,12 @@ class _HomePageRevisionState extends State<HomePageRevision>
       }
     }
     return id + 1;
+  }
+
+  String getUserId(BuildContext context) {
+    String userId = Provider.of<UserProvider>(context).firebaseUser.uid;
+    print(userId);
+    return userId;
   }
 
   @override
@@ -159,11 +166,13 @@ class _HomePageRevisionState extends State<HomePageRevision>
                       child: BlocBuilder<TodoBloc, TodoState>(
                         builder: (context, state) {
                           if (state is TodoInitial) {
-                            BlocProvider.of<TodoBloc>(context)
-                                .add(FetchTodoItems(userId: 'id'));
+                            print('initial');
+                            BlocProvider.of<TodoBloc>(context).add(
+                                FetchTodoItems(userId: getUserId(context)));
                           }
 
                           if (state is TodoLoading) {
+                            print('loading');
                             return SpinKitCircle(
                               key: UniqueKey(),
                               color: AppTheme.color_accent_2,
@@ -197,6 +206,7 @@ class _HomePageRevisionState extends State<HomePageRevision>
                           }
 
                           if (state is TodoError) {
+                            print('error');
                             return Center(
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -267,7 +277,7 @@ class _HomePageRevisionState extends State<HomePageRevision>
   }) {
     return SlideTransition(
       position: animation.drive(_offset.chain(CurveTween(
-        curve: Curves.slowMiddle,
+        curve: Curves.bounceInOut,
       ))),
       child: TaskRowWidget(
         todoItem: todoItem,
@@ -283,7 +293,6 @@ class _HomePageRevisionState extends State<HomePageRevision>
     TodoItem to_be_deleted = todoItem;
     to_be_deleted.done = false;
     int index = todoItems.indexOf(to_be_deleted);
-    print(index);
 
     //For extra safety measure
     if (index >= 0) {
@@ -303,5 +312,6 @@ class _HomePageRevisionState extends State<HomePageRevision>
 
     todoItems.removeWhere((item) => item.id == todoItem.id);
     print('removing item at #$index');
+    print('new list length: ${todoItems.length}');
   }
 }

@@ -2,8 +2,11 @@ import 'dart:convert';
 
 import 'package:gotodo/core/exceptions/exceptions.dart';
 import 'package:gotodo/data/models/todo_item_model.dart';
+import 'package:gotodo/data/models/user_model.dart';
+import 'package:gotodo/domain/entities/user.dart';
 
 import 'package:http/http.dart' as http;
+import 'package:meta/meta.dart';
 
 abstract class IRemoteDataSource {
   //Todo controller endpoints
@@ -11,11 +14,24 @@ abstract class IRemoteDataSource {
   Future<TodoItemModel> createTodoItem(String userId, TodoItemModel todoItem);
   Future<TodoItemModel> deleteTodoItem(int id);
 
-  //TODO: User controller endpoints
+  //User controller endpoints
+  Future<UserEntity> createUser(
+      {@required String userId, @required String username});
+  Future<UserEntity> getUser({@required String userId});
 }
 
 class ApiService implements IRemoteDataSource {
-  String baseUrl = 'https://localhost:5001/';
+  final String baseUrl = 'https://localhost:5001/';
+  final String apiKey = 'e0AmYP01CfaQPhMGTedo';
+
+  Map<String, String> _header = Map<String, String>();
+
+  ApiService() {
+    _header = {
+      'Content-Type': 'application/json',
+      'ApiKey': apiKey,
+    };
+  }
 
   @override
   Future<TodoItemModel> createTodoItem(
@@ -24,7 +40,7 @@ class ApiService implements IRemoteDataSource {
     final jsonPostBody = jsonEncode(todoItem.toMap());
     print(jsonPostBody);
     final result = await http.post(baseUrl + 'todo/$userId/create',
-        body: jsonPostBody, headers: {'Content-Type': 'application/json'});
+        body: jsonPostBody, headers: _header);
     print(result.statusCode);
     print(result.body);
     if (result.statusCode == 200) {
@@ -39,8 +55,8 @@ class ApiService implements IRemoteDataSource {
   @override
   Future<List<TodoItemModel>> getAllTodoItems(String userId) async {
     List<TodoItemModel> todoList;
-    final result = await http.get(baseUrl + 'todo/$userId/all',
-        headers: {'Content-Type': 'application/json'});
+    final result =
+        await http.get(baseUrl + 'todo/$userId/all', headers: _header);
     if (result.statusCode == 200) {
       final jsonBody = jsonDecode(result.body);
       todoList = (jsonBody as List)
@@ -55,7 +71,8 @@ class ApiService implements IRemoteDataSource {
   @override
   Future<TodoItemModel> deleteTodoItem(int id) async {
     TodoItemModel todoItem;
-    final result = await http.get(baseUrl + 'todo/$id/delete');
+    final result =
+        await http.get(baseUrl + 'todo/$id/delete', headers: _header);
     if (result.statusCode == 200) {
       final jsonBody = jsonDecode(result.body);
       todoItem = TodoItemModel.fromJson(json: jsonBody);
@@ -65,7 +82,28 @@ class ApiService implements IRemoteDataSource {
     }
   }
 
-  //TODO: Create user
+  @override
+  Future<UserEntity> createUser(
+      {@required String userId, @required String username}) async {
+    UserModel receivedUser;
+    final result = await http.post(baseUrl + 'user/create/$userId/$username',
+        headers: _header);
+    if (result.statusCode == 200) {
+      final jsonResult = jsonDecode(result.body);
+      receivedUser = UserModel.fromJson(jsonResult);
+      return receivedUser;
+    } else {
+      throw new ServerException();
+    }
+  }
 
-  //TODO: Get user
+  @override
+  Future<UserEntity> getUser({@required String userId}) async {
+    final result = await http.get(baseUrl + 'user/$userId', headers: _header);
+    if (result.statusCode == 200) {
+      return UserModel.fromJson(jsonDecode(result.body));
+    } else {
+      throw new ServerException();
+    }
+  }
 }

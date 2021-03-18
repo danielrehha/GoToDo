@@ -4,21 +4,40 @@ abstract class UserState extends Equatable {
   const UserState();
 }
 
-class UserInitial extends UserState {
+class UserBlocInitialState extends UserState {
   @override
   List<Object> get props => [];
 }
 
-class UserLoggedIn extends UserState {
+class UserBlocLoadingState extends UserState {
+  @override
+  List<Object> get props => [];
+}
+
+class UserBlocErrorState extends UserState {
+  @override
+  List<Object> get props => [];
+}
+
+class UserBlocNotFoundState extends UserState {
+  final String userId;
+
+  UserBlocNotFoundState({@required this.userId});
+
+  @override
+  List<Object> get props => [userId];
+}
+
+class UserBlocSignedInState extends UserState {
   final UserEntity user;
 
-  const UserLoggedIn(this.user);
+  const UserBlocSignedInState(this.user);
 
   @override
   List<Object> get props => [user];
 }
 
-class SignedOut extends UserState {
+class UserBlocSignedOutState extends UserState {
   @override
   List<Object> get props => [];
 }

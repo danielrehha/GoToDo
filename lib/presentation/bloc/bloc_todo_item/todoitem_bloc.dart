@@ -40,7 +40,7 @@ class TodoItemBloc extends Bloc<TodoItemEvent, TodoItemState> {
         print('Error creating task! [bloc]');
         yield TodoItemCreationError(todoItem: event.todoItem);
       }
-    } else if (event is ResetAddTaskPageState) {
+    } else if (event is ResetAddTaskPageEvent) {
       yield TodoItemInitial();
     }
   }

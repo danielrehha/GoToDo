@@ -8,9 +8,16 @@ abstract class UserEvent extends Equatable {
 }
 
 class FetchUserEvent extends UserEvent {
-  
+  final String userId;
+
+  FetchUserEvent(this.userId);
 }
 
-class SignOutUserEvent extends UserEvent {
+class CreateUserEvent extends UserEvent {
+  final String userId;
+  final String username;
 
+  CreateUserEvent({@required this.userId, @required this.username});
 }
+
+class SignOutUserEvent extends UserEvent {}

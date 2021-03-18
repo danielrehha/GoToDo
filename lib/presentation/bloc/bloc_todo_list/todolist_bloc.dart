@@ -26,5 +26,8 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
         yield TodoError();
       }
     }
+    if (event is ClearTodoItemsEvent) {
+      yield TodoInitial();
+    }
   }
 }

@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:gotodo/core/providers/user_provider/user_provider.dart';
+import 'package:gotodo/presentation/bloc/bloc_user/user_bloc.dart';
 import 'package:gotodo/presentation/theme/custom_theme_v1.1.dart';
+import 'package:provider/provider.dart';
 
 class SignupDetails extends StatefulWidget {
   SignupDetails({Key key}) : super(key: key);
@@ -10,6 +15,27 @@ class SignupDetails extends StatefulWidget {
 
 class _SignupDetailsState extends State<SignupDetails> {
   int pageIndex = 0;
+
+  TextEditingController _nameController;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController();
+  }
+
+  void navigateToHomePage(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
+    });
+  }
+
+  void createUser(BuildContext context) {
+    final userId =
+        Provider.of<UserProvider>(context, listen: false).firebaseUser.uid;
+    BlocProvider.of<UserBloc>(context)
+        .add(CreateUserEvent(userId: userId, username: _nameController.text));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,6 +79,7 @@ class _SignupDetailsState extends State<SignupDetails> {
                         decoration: InputDecoration(
                           border: InputBorder.none,
                         ),
+                        controller: _nameController,
                       ),
                     ),
                   ],
@@ -67,7 +94,7 @@ class _SignupDetailsState extends State<SignupDetails> {
                   ],
                 ),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     InkWell(
                       child: Icon(
@@ -81,48 +108,36 @@ class _SignupDetailsState extends State<SignupDetails> {
                         goLeft();
                       },
                     ),
-                    AnimatedSwitcher(
+/*                     AnimatedSwitcher(
                         duration: Duration(milliseconds: 200),
-                        child: dotPageMark()),
-                    InkWell(
-                      child: Icon(
-                        Icons.keyboard_arrow_right,
-                        size: 32,
-                      ),
-                      onTap: () {
-                        goRight();
+                        child: dotPageMark()), */
+                    BlocBuilder<UserBloc, UserState>(
+                      builder: (context, state) {
+                        if (state is UserBlocSignedInState) {
+                          Provider.of<UserProvider>(context, listen: false)
+                              .setUserModel(user: state.user);
+                          navigateToHomePage(context);
+                        }
+                        if (state is UserBlocErrorState) {}
+                        if (state is UserBlocLoadingState) {
+                          return SpinKitCircle(
+                              size: 20, color: AppTheme.color_accent_3);
+                        }
+                        return InkWell(
+                          child: Icon(
+                            Icons.keyboard_arrow_right,
+                            size: 32,
+                          ),
+                          onTap: () {
+                            createUser(context);
+                          },
+                        );
                       },
                     ),
                   ],
                 ),
               ],
             ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget customInputField() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.black12,
-/*                     boxShadow: [
-                      BoxShadow(
-                          blurRadius: 2,
-                          color: Colors.black12,
-                          offset: Offset(0, 1))
-                    ], */
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: TextField(
-          decoration: InputDecoration(
-            border: InputBorder.none,
-            hintText: 'Password',
-            hintStyle:
-                TextStyle(fontFamily: 'Proxima', fontWeight: FontWeight.w400),
           ),
         ),
       ),

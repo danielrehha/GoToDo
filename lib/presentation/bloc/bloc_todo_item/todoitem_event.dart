@@ -20,7 +20,7 @@ class CreateTodoItemEvent extends TodoItemEvent {
   List<Object> get props => [id];
 }
 
-class ResetAddTaskPageState extends TodoItemEvent {
+class ResetAddTaskPageEvent extends TodoItemEvent {
   @override
   List<Object> get props => [];
 }
