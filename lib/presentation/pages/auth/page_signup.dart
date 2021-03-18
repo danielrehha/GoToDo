@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:gotodo/core/providers/user_provider/user_provider.dart';
+import 'package:gotodo/core/utils/email_match_verification.dart';
 import 'package:gotodo/presentation/bloc/bloc_firebase_user/firebase_user_bloc.dart';
 import 'package:gotodo/presentation/pages/extra/page_loading_user_details_router.dart';
 import 'package:gotodo/presentation/theme/custom_theme_v1.1.dart';
@@ -22,19 +23,31 @@ class _SignupPageState extends State<SignupPage> {
   String errorMessage;
   bool showPassword = false;
 
-  TextEditingController _emailController;
+  TextEditingController _emailController1;
+  TextEditingController _emailController2;
   TextEditingController _passwordController;
+
+  EmailMatchVerification emailMatchVerification = EmailMatchVerification();
 
   @override
   void initState() {
     super.initState();
-    _emailController = TextEditingController();
+    _emailController1 = TextEditingController();
+    _emailController2 = TextEditingController();
     _passwordController = TextEditingController();
   }
 
   void createUser(BuildContext context) {
-    BlocProvider.of<FirebaseUserBloc>(context).add(FirebaseCreateUserEvent(
-        _passwordController.text, _emailController.text));
+    if (emailMatchVerification(
+        value1: _emailController1.text, value2: _emailController2.text)) {
+      BlocProvider.of<FirebaseUserBloc>(context).add(FirebaseCreateUserEvent(
+          _passwordController.text, _emailController1.text));
+    } else {
+      setState(() {
+        isError = true;
+        this.errorMessage = 'Email addresses do not match.';
+      });
+    }
   }
 
   void showError(BuildContext context, {@required String error}) async {
@@ -141,7 +154,7 @@ class _SignupPageState extends State<SignupPage> {
                         border: InputBorder.none,
                         hintText: 'Email address',
                       ),
-                      controller: _emailController,
+                      controller: _emailController1,
                       onChanged: (String value) {
                         hideError(context);
                       },
@@ -163,6 +176,7 @@ class _SignupPageState extends State<SignupPage> {
                         border: InputBorder.none,
                         hintText: 'Confirm email address',
                       ),
+                      controller: _emailController2,
                       onChanged: (String value) {
                         hideError(context);
                       },

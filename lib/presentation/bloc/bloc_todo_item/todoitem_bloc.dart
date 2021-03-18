@@ -42,6 +42,16 @@ class TodoItemBloc extends Bloc<TodoItemEvent, TodoItemState> {
       }
     } else if (event is ResetAddTaskPageEvent) {
       yield TodoItemInitial();
+    } else if (event is EditTodoItemEvent) {
+      yield TodoItemCreating(todoItem: event.todoItem);
+      final result = await repository.editTodoItem(event.todoItem);
+      if (result.isRight()) {
+        print('Edited task! [bloc]');
+        yield TodoItemCreated(todoItem: result.getOrElse(() => null));
+      } else {
+        print('Error creating task! [bloc]');
+        yield TodoItemCreationError(todoItem: event.todoItem);
+      }
     }
   }
 }

@@ -10,7 +10,6 @@ import 'package:gotodo/domain/entities/todo_item.dart';
 import 'package:gotodo/presentation/bloc/bloc_todo_item/todoitem_bloc.dart';
 import 'package:gotodo/presentation/theme/custom_theme_v1.1.dart';
 import 'package:gotodo/presentation/widgets/widget_button.dart';
-import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -18,8 +17,9 @@ typedef AddTaskCallback = void Function(TodoItem todoItem);
 
 class AddTaskPage extends StatefulWidget {
   final AddTaskCallback addTaskCallback;
+  TodoItemModel todoItem;
 
-  const AddTaskPage({Key key, @required this.addTaskCallback})
+  AddTaskPage({Key key, @required this.addTaskCallback, this.todoItem})
       : super(key: key);
 
   @override
@@ -28,8 +28,6 @@ class AddTaskPage extends StatefulWidget {
 
 class _AddTaskPageState extends State<AddTaskPage>
     with SingleTickerProviderStateMixin {
-  TodoItemModel todoItem;
-
   TextEditingController taskTitleController;
   CalendarController _calendarController;
 
@@ -39,6 +37,8 @@ class _AddTaskPageState extends State<AddTaskPage>
   bool isDatePickerOpened = false;
   bool isErrorMessage = false;
   String errorMessage = 'Task title cannot be empty';
+
+  bool isEdit = false;
 
   EmptyFieldVerification fieldVerification = EmptyFieldVerification();
 
@@ -73,19 +73,20 @@ class _AddTaskPageState extends State<AddTaskPage>
       }
     });
 
-    todoItem = TodoItemModel(
-      id: 0,
-      userId: 'id',
-      title: taskTitleController.text,
-      due: DateTime.now(),
-      done: false,
-    );
+    if (widget.todoItem == null) {
+      isEdit = false;
+      widget.todoItem = TodoItemModel(
+          due: DateTime.now(), title: "", done: false, userId: 'id', id: 0);
+    } else {
+      isEdit = true;
+      taskTitleController.text = widget.todoItem.title;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    todoItem.userId =
-        Provider.of<UserProvider>(context, listen: false).userModel.userId;
+/*     widget.todoItem.userId =
+        Provider.of<UserProvider>(context, listen: false).userModel.userId; */
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -103,7 +104,7 @@ class _AddTaskPageState extends State<AddTaskPage>
                     },
                   ),
                   Text(
-                    'Create task',
+                    isEdit ? 'Edit task ' : 'Create task',
                     style: AppTheme.textStyle_h3_black,
                   ),
                   BlocBuilder<TodoItemBloc, TodoItemState>(
@@ -194,7 +195,7 @@ class _AddTaskPageState extends State<AddTaskPage>
                       ),
                       Text(
                         TranslateDate.call(
-                          date: todoItem.due,
+                          date: widget.todoItem.due,
                         ),
                         style: AppTheme.textStyle_body_black,
                       ),
@@ -219,9 +220,13 @@ class _AddTaskPageState extends State<AddTaskPage>
               MainButton(
                 color: AppTheme.color_accent_1,
                 function: () {
-                  submitTodoItemToBloc(context, todoItem: todoItem);
+                  if (!isEdit) {
+                    submitTodoItemToBloc(context, todoItem: widget.todoItem);
+                  } else {
+                    editTodoItem(context);
+                  }
                 },
-                label: 'Add task',
+                label: isEdit ? 'Done' : 'Add task',
                 labelStyle: AppTheme.textStyle_h3_white,
               ),
             ],
@@ -243,8 +248,23 @@ class _AddTaskPageState extends State<AddTaskPage>
       {@required TodoItem todoItem}) {
     if (fieldVerification(value: taskTitleController.text)) {
       todoItem.title = taskTitleController.text;
+      todoItem.userId =
+          Provider.of<UserProvider>(context, listen: false).userModel.userId;
       BlocProvider.of<TodoItemBloc>(context)
           .add(CreateTodoItemEvent(todoItem: todoItem));
+    } else {
+      setState(() {
+        isErrorMessage = true;
+      });
+    }
+  }
+
+  void editTodoItem(BuildContext context) {
+    if (fieldVerification(value: taskTitleController.text)) {
+      widget.todoItem.title = taskTitleController.text;
+      widget.addTaskCallback(widget.todoItem);
+      BlocProvider.of<TodoItemBloc>(context)
+          .add(EditTodoItemEvent(widget.todoItem));
     } else {
       setState(() {
         isErrorMessage = true;
@@ -272,7 +292,7 @@ class _AddTaskPageState extends State<AddTaskPage>
               calendarController: _calendarController,
               onDaySelected: (DateTime date, List events, List events2) {
                 setState(() {
-                  todoItem.due = date;
+                  widget.todoItem.due = date;
                 });
               },
             ),

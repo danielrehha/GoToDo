@@ -1,15 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:gotodo/core/providers/user_provider/user_provider.dart';
 import 'package:gotodo/data/models/user_model.dart';
-import 'package:gotodo/presentation/bloc/bloc_firebase_user/firebase_user_bloc.dart';
 import 'package:gotodo/presentation/bloc/bloc_user/user_bloc.dart';
-import 'package:gotodo/presentation/theme/custom_theme_v1.1.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:gotodo/presentation/widgets/widget_loading_indicator.dart';
-import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
 
 class UserDetailsRouterLoadingPage extends StatefulWidget {

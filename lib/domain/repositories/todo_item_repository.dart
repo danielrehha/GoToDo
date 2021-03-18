@@ -11,6 +11,7 @@ abstract class ITodoItemRepository {
   Future<Either<Failure, TodoItemModel>> createTodoItem(
       {@required String userId, @required TodoItemModel todoItem});
   Future<Either<Failure, TodoItemModel>> deleteTodoItem(TodoItem todoItem);
+  Future<Either<Failure, TodoItemModel>> editTodoItem(TodoItem todoItem);
 }
 
 class TodoItemRepository implements ITodoItemRepository {
@@ -47,6 +48,16 @@ class TodoItemRepository implements ITodoItemRepository {
       final result = await remoteDataSource.deleteTodoItem(todoItem.id);
       return Right(result);
     } on ServerException {
+      return Left(ServerFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, TodoItemModel>> editTodoItem(TodoItem todoItem) async {
+    try {
+      final result = await remoteDataSource.editTodoItem(todoItem: todoItem);
+      return Right(result);
+    } on ServerException catch (e) {
       return Left(ServerFailure());
     }
   }

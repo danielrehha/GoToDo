@@ -7,7 +7,9 @@ import 'package:gotodo/core/utils/translate_date_color.dart';
 import 'package:gotodo/data/models/todo_item_model.dart';
 import 'package:gotodo/domain/entities/todo_item.dart';
 import 'package:gotodo/presentation/bloc/bloc_todo_item/todoitem_bloc.dart';
+import 'package:gotodo/presentation/pages/home/page_add_task.dart';
 import 'package:gotodo/presentation/theme/custom_theme_v1.1.dart';
+import 'package:page_transition/page_transition.dart';
 
 typedef TodoCompletedCallback = Future<void> Function(
     TodoItem todoItem, bool success);
@@ -115,6 +117,24 @@ class _TaskRowWidgetState extends State<TaskRowWidget> {
                   ),
                 ],
               ),
+              Spacer(),
+              InkWell(
+                  child: Icon(
+                    Feather.edit_2,
+                    color: Colors.white,
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        PageTransition(
+                            child: AddTaskPage(
+                              addTaskCallback: (TodoItem todoItem) {
+                                widget.todoItem = todoItem;
+                              },
+                              todoItem: widget.todoItem,
+                            ),
+                            type: PageTransitionType.bottomToTop));
+                  })
             ],
           ),
         ),

@@ -23,16 +23,6 @@ class _AuthRouterLoadingPageState extends State<AuthRouterLoadingPage> {
   @override
   void initState() {
     super.initState();
-/*     FirebaseAuth.instance.authStateChanges().listen((User user) {
-      if (user == null) {
-        firebaseSignedIn = false;
-      } else {
-        firebaseSignedIn = true;
-        this.user = user;
-        print(user.uid);
-      }
-      
-    }); */
     registerAuthListener(context);
   }
 
